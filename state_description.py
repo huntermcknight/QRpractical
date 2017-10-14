@@ -4,6 +4,13 @@ POS = 1
 NEG = -1
 MAX = 2
 
+IQ = 0
+ID = 1
+VQ = 2
+VD = 3
+OQ = 4
+OD = 5
+
 class State_Description:
     """
      A qualitative state description for a tub consisting of an inflow, volume,
@@ -30,43 +37,43 @@ class State_Description:
         self.params = values
 
     def get_inflow_q(self):
-        return self.params[0]
+        return self.params[IQ]
 
     def get_inflow_d(self):
-        return self.params[1]
+        return self.params[ID]
 
     def get_volume_q(self):
-        return self.params[2]
+        return self.params[VQ]
 
     def get_volume_d(self):
-        return self.self.params[3]
+        return self.self.params[VD]
 
     def get_outflow_q(self):
-        return self.self.params[4]
+        return self.self.params[OQ]
 
     def get_outflow_d(self):
-        return self.params[5]
+        return self.params[OD]
 
     def get_all_params(self):
         return self.params
 
     def set_inflow_q(self, value):
-        self.params[0] = value
+        self.params[IQ] = value
 
     def set_inflow_d(self, value):
-        self.params[1] = value
+        self.params[ID] = value
 
     def set_volume_q(self, value):
-        self.params[2] = value
+        self.params[VQ] = value
 
     def set_volume_d(self, value):
-        self.params[3] = value
+        self.params[VD] = value
 
     def set_outflow_q(self, value):
-        self.params[4] = value
+        self.params[OQ] = value
 
     def set_outflow_d(self, value):
-        self.params[5] = value
+        self.params[OD] = value
 
     def set_all_params(self, values):
         # sanitize input
@@ -80,16 +87,16 @@ class State_Description:
         string = 'STATE DESCRIPTION\n'
 
         string += 'INFLOW\n'
-        string += 'Q: ' + State_Description.str_trans[self.params[0]] + '\n'
-        string += 'd: ' + State_Description.str_trans[self.params[1]] + '\n'
+        string += 'Q: ' + State_Description.str_trans[self.params[IQ]] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.params[ID]] + '\n'
 
         string += 'VOLUME\n'
-        string += 'Q: ' + State_Description.str_trans[self.params[2]] + '\n'
-        string += 'd: ' + State_Description.str_trans[self.params[3]] + '\n'
+        string += 'Q: ' + State_Description.str_trans[self.params[VQ]] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.params[VD]] + '\n'
 
         string += 'OUTFLOW\n'
-        string += 'Q: ' + State_Description.str_trans[self.params[4]] + '\n'
-        string += 'd: ' + State_Description.str_trans[self.params[5]] + '\n'
+        string += 'Q: ' + State_Description.str_trans[self.params[OQ]] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.params[OD]] + '\n'
 
         return string
 
