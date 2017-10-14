@@ -14,15 +14,20 @@ class State_Description:
     # mapping of integer values of global constants to strings for printing
     str_trans = {0 : '0', 1 : '+', -1 : '-', 2 : 'MAX'}
 
-    def __init__(self):
-        self.inflow_q = ZERO
-        self.inflow_d = ZERO
+    def __init__(self, values = 6 * [ZERO]):
 
-        self.volume_q = ZERO
-        self.volume_d = ZERO
+        # sanitize input
+        if len(values) != 6:
+            values = 6 * [ZERO]
 
-        self.outflow_q = ZERO
-        self.outflow_d = ZERO
+        self.inflow_q = values[0]
+        self.inflow_d = values[1]
+
+        self.volume_q = values[2]
+        self.volume_d = values[3]
+
+        self.outflow_q = values[4]
+        self.outflow_d = values[5]
 
     def get_inflow_q(self):
         return self.inflow_q
@@ -64,22 +69,27 @@ class State_Description:
         string = 'STATE DESCRIPTION\n'
 
         string += 'INFLOW\n'
-        string += 'Q: ' + str_trans[self.inflow_q] + '\n'
-        string += 'd: ' + str_trans[self.inflow_d] + '\n'
+        string += 'Q: ' + State_Description.str_trans[self.inflow_q] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.inflow_d] + '\n'
 
         string += 'VOLUME\n'
-        string += 'Q: ' + str_trans[self.volume_q] + '\n'
-        string += 'd: ' + str_trans[self.volume_d] + '\n'
+        string += 'Q: ' + State_Description.str_trans[self.volume_q] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.volume_d] + '\n'
 
         string += 'OUTFLOW\n'
-        string += 'Q: ' + str_trans[self.outflow_q] + '\n'
-        string += 'd: ' + str_trans[self.outflow_d] + '\n'
+        string += 'Q: ' + State_Description.str_trans[self.outflow_q] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.outflow_d] + '\n'
 
         return string
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return self.__dict__ == other.__dict__
+            return (self.inflow_q == other.inflow_q
+                    and self.inflow_d == other.inflow_d
+                    and self.volume_q == other.volume_q
+                    and self.volume_d == other.volume_d
+                    and self.outflow_q == other.outflow_q
+                    and self.outflow_d == other.outflow_d)
         else:
             return False
 
@@ -87,4 +97,6 @@ class State_Description:
         return not self.__eq__(other)
 
     def __hash__(self):
-        return hash(tuple(sorted(self.__dict__.items())))
+        return hash((self.inflow_q, self.inflow_d,
+                     self.volume_q, self.volume_d,
+                     self.outflow_q, self.outflow_d))
