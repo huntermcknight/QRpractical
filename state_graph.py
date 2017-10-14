@@ -152,6 +152,9 @@ def enforce_derivatives(sd, spaces):
 
     if params[ID] == ZERO:
         spaces[IQ] = set([params[IQ]])
+    else:
+        if params[IQ] == POS:
+            spaces[IQ] = set([POS])
 
     for i in [VD, OD]:
         if params[i] == ZERO:
@@ -198,7 +201,7 @@ def main():
 
     print(len(graph.keys()))
 
-    sd = State_Description([POS, ZERO, MAX, ZERO, MAX, ZERO])
+    sd = State_Description([POS, POS, MAX, ZERO, MAX, ZERO])
 
     print(len(graph[sd]))
     for n in graph[sd]:
