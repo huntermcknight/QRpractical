@@ -26,13 +26,9 @@ def create_all_nodes():
                     for oq_val in OQ_SPACE:
                         for od_val in OD_SPACE:
                             # create new state description
-                            sd = State_Description()
-                            sd.set_inflow_q(iq_val)
-                            sd.set_inflow_d(id_val)
-                            sd.set_volume_q(vq_val)
-                            sd.set_volume_d(vd_val)
-                            sd.set_outflow_q(oq_val)
-                            sd.set_outflow_d(od_val)
+                            sd = State_Description([iq_val, id_val,
+                                                   vq_val, vd_val,
+                                                   oq_val, od_val])
 
                             # add the new description to the graph as node
                             # the list of nodes reachable from the new node

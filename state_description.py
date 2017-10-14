@@ -9,87 +9,93 @@ class State_Description:
      A qualitative state description for a tub consisting of an inflow, volume,
      and outflow. Each of these features of the state has both a quantity and a
      derivative.
+
+     The parameters of a state description are always given in the following
+     order:
+     inflow_q, inflow_d, volume_q, volume_d, outflow_q, outflow_d
+
+     The parameters passed to State_Description should be (a list of) ints.
+     Use the global constants defined above for best results.
     """
 
     # mapping of integer values of global constants to strings for printing
     str_trans = {0 : '0', 1 : '+', -1 : '-', 2 : 'MAX'}
 
     def __init__(self, values = 6 * [ZERO]):
-
         # sanitize input
         if len(values) != 6:
             values = 6 * [ZERO]
+            print('Invalid state description: should be six ints')
 
-        self.inflow_q = values[0]
-        self.inflow_d = values[1]
-
-        self.volume_q = values[2]
-        self.volume_d = values[3]
-
-        self.outflow_q = values[4]
-        self.outflow_d = values[5]
+        self.params = values
 
     def get_inflow_q(self):
-        return self.inflow_q
+        return self.params[0]
 
     def get_inflow_d(self):
-        return self.inflow_d
+        return self.params[1]
 
     def get_volume_q(self):
-        return self.volume_q
+        return self.params[2]
 
     def get_volume_d(self):
-        return self.volume_d
+        return self.self.params[3]
 
     def get_outflow_q(self):
-        return self.outflow_q
+        return self.self.params[4]
 
     def get_outflow_d(self):
-        return self.outflow_d
+        return self.params[5]
+
+    def get_all_params(self):
+        return self.params
 
     def set_inflow_q(self, value):
-        self.inflow_q = value
+        self.params[0] = value
 
     def set_inflow_d(self, value):
-        self.inflow_d = value
+        self.params[1] = value
 
     def set_volume_q(self, value):
-        self.volume_q = value
+        self.params[2] = value
 
     def set_volume_d(self, value):
-        self.volume_d = value
+        self.params[3] = value
 
     def set_outflow_q(self, value):
-        self.outflow_q = value
+        self.params[4] = value
 
     def set_outflow_d(self, value):
-        self.outflow_d = value
+        self.params[5] = value
+
+    def set_all_params(self, values):
+        # sanitize input
+        if len(values) != 6:
+            print('Invalid state description: should be six ints')
+        else:
+            self.params = values
+
 
     def __str__(self):
         string = 'STATE DESCRIPTION\n'
 
         string += 'INFLOW\n'
-        string += 'Q: ' + State_Description.str_trans[self.inflow_q] + '\n'
-        string += 'd: ' + State_Description.str_trans[self.inflow_d] + '\n'
+        string += 'Q: ' + State_Description.str_trans[self.params[0]] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.params[1]] + '\n'
 
         string += 'VOLUME\n'
-        string += 'Q: ' + State_Description.str_trans[self.volume_q] + '\n'
-        string += 'd: ' + State_Description.str_trans[self.volume_d] + '\n'
+        string += 'Q: ' + State_Description.str_trans[self.params[2]] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.params[3]] + '\n'
 
         string += 'OUTFLOW\n'
-        string += 'Q: ' + State_Description.str_trans[self.outflow_q] + '\n'
-        string += 'd: ' + State_Description.str_trans[self.outflow_d] + '\n'
+        string += 'Q: ' + State_Description.str_trans[self.params[4]] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.params[5]] + '\n'
 
         return string
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
-            return (self.inflow_q == other.inflow_q
-                    and self.inflow_d == other.inflow_d
-                    and self.volume_q == other.volume_q
-                    and self.volume_d == other.volume_d
-                    and self.outflow_q == other.outflow_q
-                    and self.outflow_d == other.outflow_d)
+            return (tuple(self.params) == tuple(other.params))
         else:
             return False
 
@@ -97,6 +103,4 @@ class State_Description:
         return not self.__eq__(other)
 
     def __hash__(self):
-        return hash((self.inflow_q, self.inflow_d,
-                     self.volume_q, self.volume_d,
-                     self.outflow_q, self.outflow_d))
+        return hash(tuple(self.params))
