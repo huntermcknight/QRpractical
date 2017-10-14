@@ -18,6 +18,11 @@ def find_neighbors(graph, to_search, sd):
 
     params = sd.get_all_params()
 
+    # check to see if the current state is stable (all derivs == ZERO)
+    # if so, no further change is possible
+    if ((((params[ID] == ZERO) and params[VD] == ZERO) and params[OD] == 0)):
+        pass
+
     # initially, we consider any transition possible
     spaces = [IQ_SPACE.copy(), set([POS]),
               VQ_SPACE.copy(), VD_SPACE.copy(),
@@ -193,7 +198,7 @@ def main():
 
     print(len(graph.keys()))
 
-    sd = State_Description([POS, POS, MAX, ZERO, MAX, ZERO])
+    sd = State_Description([POS, ZERO, MAX, ZERO, MAX, ZERO])
 
     print(len(graph[sd]))
     for n in graph[sd]:
