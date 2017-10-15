@@ -1,4 +1,5 @@
 from state_description import *
+from plot_graph import PlotGraph
 
 # discretized quantity and derivative spaces
 IQ_SPACE = set([ZERO, POS])
@@ -226,10 +227,10 @@ def main():
     for n in graph[sd]:
         print(n)
 
+    dot_graph = PlotGraph(graph)
+    dot_graph.generate_graph(sd)
+    dot_graph.save()
 
 
 if __name__ == '__main__':
     main()
-
-
-
