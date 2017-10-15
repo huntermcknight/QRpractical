@@ -10,6 +10,10 @@ VQ = 2
 VD = 3
 OQ = 4
 OD = 5
+HQ = 6
+HD = 7
+PQ = 8
+PD = 9
 
 class State_Description:
     """
@@ -28,11 +32,11 @@ class State_Description:
     # mapping of integer values of global constants to strings for printing
     str_trans = {0 : '0', 1 : '+', -1 : '-', 2 : 'MAX'}
 
-    def __init__(self, values = 6 * [ZERO]):
+    def __init__(self, values = 10 * [ZERO]):
         # sanitize input
-        if len(values) != 6:
-            values = 6 * [ZERO]
-            print('Invalid state description: should be six ints')
+        if len(values) != 10:
+            values = 10 * [ZERO]
+            print('Invalid state description: should be ten ints')
 
         self.params = values
 
@@ -53,6 +57,18 @@ class State_Description:
 
     def get_outflow_d(self):
         return self.params[OD]
+
+    def get_height_q(self):
+        return self.self.params[HQ]
+
+    def get_height_d(self):
+        return self.params[HD]
+
+    def get_pressure_q(self):
+        return self.self.params[PQ]
+
+    def get_pressure_d(self):
+        return self.params[PD]
 
     def get_all_params(self):
         return self.params
@@ -75,18 +91,28 @@ class State_Description:
     def set_outflow_d(self, value):
         self.params[OD] = value
 
+    def set_height_q(self, value):
+        self.params[HQ] = value
+
+    def set_height_d(self, value):
+        self.params[HD] = value
+
+    def set_pressure_q(self, value):
+        self.params[PQ] = value
+
+    def set_pressure_d(self, value):
+        self.params[PD] = value
+
     def set_all_params(self, values):
         # sanitize input
-        if len(values) != 6:
-            print('Invalid state description: should be six ints')
+        if len(values) != 10:
+            print('Invalid state description: should be ten ints')
         else:
             self.params = values
 
 
     def __str__(self):
-        string = 'STATE DESCRIPTION\n'
-
-        string += 'INFLOW\n'
+        string = 'INFLOW\n'
         string += 'Q: ' + State_Description.str_trans[self.params[IQ]] + '\n'
         string += 'd: ' + State_Description.str_trans[self.params[ID]] + '\n'
 
@@ -97,6 +123,14 @@ class State_Description:
         string += 'OUTFLOW\n'
         string += 'Q: ' + State_Description.str_trans[self.params[OQ]] + '\n'
         string += 'd: ' + State_Description.str_trans[self.params[OD]] + '\n'
+
+        string += 'Height\n'
+        string += 'Q: ' + State_Description.str_trans[self.params[HQ]] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.params[HD]] + '\n'
+
+        string += 'Pressure\n'
+        string += 'Q: ' + State_Description.str_trans[self.params[PQ]] + '\n'
+        string += 'd: ' + State_Description.str_trans[self.params[PD]] + '\n'
 
         return string
 

@@ -8,6 +8,10 @@ VQ_SPACE = set([ZERO, POS, MAX])
 VD_SPACE = set([NEG, ZERO, POS])
 OQ_SPACE = set([ZERO, POS, MAX])
 OD_SPACE = set([NEG, ZERO, POS])
+HQ_SPACE = set([ZERO, POS, MAX])
+HD_SPACE = set([NEG, ZERO, POS])
+PQ_SPACE = set([ZERO, POS, MAX])
+PD_SPACE = set([NEG, ZERO, POS])
 
 
 def find_neighbors(graph, to_search, sd):
@@ -20,13 +24,19 @@ def find_neighbors(graph, to_search, sd):
 
     # check to see if the current state is stable (all derivs == ZERO)
     # if so, no further change is possible
-    if ((((params[ID] == ZERO) and params[VD] == ZERO) and params[OD] == 0)):
-        pass
+    if params[ID] == 0:
+        if params[VD] == 0:
+            if params[OD] == 0:
+                if params[HD] == 0:
+                    if params[PD] == 0:
+                        return
 
     # initially, we consider any transition possible
     spaces = [IQ_SPACE.copy(), set([ZERO, POS]),
               VQ_SPACE.copy(), VD_SPACE.copy(),
-              OQ_SPACE.copy(), OD_SPACE.copy()]
+              OQ_SPACE.copy(), OD_SPACE.copy(),
+              HQ_SPACE.copy(), HD_SPACE.copy(),
+              PQ_SPACE.copy(), PD_SPACE.copy()]
 
     # prune transitions that don't respect influences
     spaces = enforce_influences(sd, spaces)
@@ -47,56 +57,105 @@ def find_neighbors(graph, to_search, sd):
                 for vd_val in spaces[VD]:
                     for oq_val in spaces[OQ]:
                         for od_val in spaces[OD]:
+                            for hq_val in spaces[HQ]:
+                                for hd_val in spaces[HD]:
+                                    for pq_val in spaces[PQ]:
+                                        for pd_val in spaces[PD]:
 
-                            # enforce correspondences from volume to outflow
-                            # MAX outflow <=> MAX volume
-                            # ZERO outflow <=> ZERO volume
-                            if (((oq_val == MAX) == (vq_val == MAX))
-                               and ((oq_val == ZERO) == (vq_val == ZERO))):
+                                            # enforce correspondences from volume to outflow
+                                            # MAX outflow <=> MAX volume
+                                            # ZERO outflow <=> ZERO volume etc
+                                            if ((oq_val == MAX) != (vq_val == MAX)):
+                                                continue
+                                            if ((oq_val == ZERO) != (vq_val == ZERO)):
+                                                continue
+                                            if ((oq_val == MAX) != (hq_val == MAX)):
+                                                continue
+                                            if ((oq_val == ZERO) != (hq_val == ZERO)):
+                                                continue
+                                            if ((oq_val == MAX) != (pq_val == MAX)):
+                                                continue
+                                            if ((oq_val == ZERO) != (pq_val == ZERO)):
+                                                continue
+                                            if ((hq_val == MAX) != (pq_val == MAX)):
+                                                continue
+                                            if ((hq_val == ZERO) != (pq_val == ZERO)):
+                                                continue
+                                            if ((vq_val == MAX) != (pq_val == MAX)):
+                                                continue
+                                            if ((vq_val == ZERO) != (pq_val == ZERO)):
+                                                continue
+                                            if ((vq_val == MAX) != (hq_val == MAX)):
+                                                continue
+                                            if ((vq_val == ZERO) != (hq_val == ZERO)):
+                                                continue
 
-                                # if a quantity hits a max or min value,
-                                # the corresponding derivative should level off
-                                # e.g., ZERO inflow => ZERO change in inflow
-                                if ((params[IQ] == POS) and (iq_val == ZERO)):
-                                    id_val = ZERO
-                                if ((params[VQ] == POS) and (vq_val == ZERO)):
-                                    vd_val = ZERO
-                                if ((params[VQ] == POS) and (vq_val == MAX)):
-                                    vd_val = ZERO
-                                if ((params[OQ] == POS) and (oq_val == ZERO)):
-                                    od_val = ZERO
-                                if ((params[OQ] == POS) and (oq_val == MAX)):
-                                    od_val = ZERO
 
-                                # If a quantity stays at a max (or min) value,
-                                # the corresponding derivative cannot start
-                                # increasing (or decreasing) again
-                                if ((params[IQ] == ZERO) and (iq_val == ZERO)):
-                                    if id_val == NEG:
-                                        continue
-                                if ((params[VQ] == ZERO) and (vq_val == ZERO)):
-                                    if vd_val == NEG:
-                                        continue
-                                if ((params[VQ] == MAX) and (vq_val == MAX)):
-                                    if vd_val == POS:
-                                        continue
-                                if ((params[OQ] == ZERO) and (oq_val == ZERO)):
-                                    if od_val == NEG:
-                                        continue
-                                if ((params[OQ] == MAX) and (oq_val == MAX)):
-                                    if od_val == POS:
-                                        continue
+                                            # if a quantity hits a max or min value,
+                                            # the corresponding derivative should level off
+                                            # e.g., ZERO inflow => ZERO change in inflow
+                                            if ((params[IQ] == POS) and (iq_val == ZERO)):
+                                                id_val = ZERO
+                                            if ((params[VQ] == POS) and (vq_val == ZERO)):
+                                                vd_val = ZERO
+                                            if ((params[VQ] == POS) and (vq_val == MAX)):
+                                                vd_val = ZERO
+                                            if ((params[OQ] == POS) and (oq_val == ZERO)):
+                                                od_val = ZERO
+                                            if ((params[OQ] == POS) and (oq_val == MAX)):
+                                                od_val = ZERO
+                                            if ((params[HQ] == POS) and (hq_val == ZERO)):
+                                                hd_val = ZERO
+                                            if ((params[HQ] == POS) and (hq_val == MAX)):
+                                                hd_val = ZERO
+                                            if ((params[PQ] == POS) and (pq_val == ZERO)):
+                                                pd_val = ZERO
+                                            if ((params[PQ] == POS) and (pq_val == MAX)):
+                                                pd_val = ZERO
 
-                                neighbor = State_Description([iq_val, id_val,
-                                                              vq_val, vd_val,
-                                                              oq_val, od_val])
+                                            # If a quantity stays at a max (or min) value,
+                                            # the corresponding derivative cannot start
+                                            # increasing (or decreasing) again
+                                            if ((params[IQ] == ZERO) and (iq_val == ZERO)):
+                                                if id_val == NEG:
+                                                    continue
+                                            if ((params[VQ] == ZERO) and (vq_val == ZERO)):
+                                                if vd_val == NEG:
+                                                    continue
+                                            if ((params[VQ] == MAX) and (vq_val == MAX)):
+                                                if vd_val == POS:
+                                                    continue
+                                            if ((params[OQ] == ZERO) and (oq_val == ZERO)):
+                                                if od_val == NEG:
+                                                    continue
+                                            if ((params[OQ] == MAX) and (oq_val == MAX)):
+                                                if od_val == POS:
+                                                    continue
+                                            if ((params[HQ] == ZERO) and (hq_val == ZERO)):
+                                                if hd_val == NEG:
+                                                    continue
+                                            if ((params[HQ] == MAX) and (hq_val == MAX)):
+                                                if hd_val == POS:
+                                                    continue
+                                            if ((params[PQ] == ZERO) and (pq_val == ZERO)):
+                                                if pd_val == NEG:
+                                                    continue
+                                            if ((params[PQ] == MAX) and (pq_val == MAX)):
+                                                if pd_val == POS:
+                                                    continue
 
-                                if neighbor == sd:
-                                    continue
-                                else:
-                                    if neighbor not in graph[sd]:
-                                        graph[sd] += [neighbor]
-                                        to_search.append(neighbor)
+                                            neighbor = State_Description([iq_val, id_val,
+                                                                          vq_val, vd_val,
+                                                                          oq_val, od_val,
+                                                                          hq_val, hd_val,
+                                                                          pq_val, pd_val])
+
+                                            if neighbor == sd:
+                                                continue
+                                            else:
+                                                if neighbor not in graph[sd]:
+                                                    graph[sd] += [neighbor]
+                                                    to_search.append(neighbor)
 
 
 def enforce_continuity(sd, spaces):
@@ -110,14 +169,14 @@ def enforce_continuity(sd, spaces):
     # there's no continuity to enforce on inflow quantity
 
     # the derivatives can't skip ZERO
-    for i in [ID, VD, OD]:
+    for i in [ID, VD, OD, HD, PD]:
         if params[i] == POS:
             spaces[i] = spaces[i].difference(set([NEG]))
         elif params[i] == NEG:
             spaces[i] = spaces[i].difference(set([POS]))
 
     # the quantity of volume and outflow can't skip POS
-    for i in [VQ, OQ]:
+    for i in [VQ, OQ, HQ, PQ]:
         if params[i] == MAX:
             spaces[i] = spaces[i].difference(set([ZERO]))
         elif params[i] == ZERO:
@@ -163,7 +222,14 @@ def enforce_proportions(sd, spaces):
 
     params = sd.get_all_params()
 
-    spaces[OD] = set([params[VD]])
+    # volume determines height
+    spaces[HD] = set([params[VD]])
+
+    # height determines pressure
+    spaces[PD] = set([params[HD]])
+
+    # pressure determines outflow
+    spaces[OD] = set([params[PD]])
 
     return spaces
 
@@ -202,7 +268,7 @@ def main():
     # describe an empty tub with no inflow
     empty = State_Description()
     # describe an empty tub in the instant the tap is opened
-    tap_on = State_Description([ZERO, POS, ZERO, ZERO, ZERO, ZERO])
+    tap_on = State_Description([ZERO, POS, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
 
     # add an edge from empty to tap_on
     graph[empty] = [tap_on]
@@ -221,7 +287,7 @@ def main():
     print(len(graph.keys()))
 
 
-    sd = State_Description([POS, POS, MAX, ZERO, MAX, ZERO])
+    sd = State_Description([POS, ZERO, MAX, ZERO, MAX, ZERO, MAX, ZERO, MAX, ZERO])
 
     print(len(graph[sd]))
     for n in graph[sd]:
