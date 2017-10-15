@@ -24,7 +24,7 @@ def find_neighbors(graph, to_search, sd):
         pass
 
     # initially, we consider any transition possible
-    spaces = [IQ_SPACE.copy(), set([POS]),
+    spaces = [IQ_SPACE.copy(), set([ZERO, POS]),
               VQ_SPACE.copy(), VD_SPACE.copy(),
               OQ_SPACE.copy(), OD_SPACE.copy()]
 
@@ -228,7 +228,7 @@ def main():
         print(n)
 
     dot_graph = PlotGraph(graph)
-    dot_graph.generate_graph(sd)
+    dot_graph.generate_graph(empty)
     dot_graph.save()
 
 
