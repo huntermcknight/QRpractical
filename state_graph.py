@@ -1,4 +1,5 @@
 from state_description import *
+from plot_graph import PlotGraph
 from collections import defaultdict
 
 # discretized quantity and derivative spaces
@@ -207,9 +208,9 @@ def main():
     for n in graph[sd]:
         print(n)
 
+    dot_graph = PlotGraph(graph)
+    dot_graph.generate_graph(sd)
+    dot_graph.save()
 
 if __name__ == '__main__':
     main()
-
-
-
