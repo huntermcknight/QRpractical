@@ -1,5 +1,4 @@
 from state_description import *
-from collections import defaultdict
 
 # discretized quantity and derivative spaces
 IQ_SPACE = set([ZERO, POS])
@@ -47,10 +46,6 @@ def find_neighbors(graph, to_search, sd):
                 for vd_val in spaces[VD]:
                     for oq_val in spaces[OQ]:
                         for od_val in spaces[OD]:
-                            neighbor = State_Description([iq_val, id_val,
-                                                                  vq_val, vd_val,
-                                                                  oq_val, od_val])
-
 
                             # enforce correspondences from volume to outflow
                             # MAX outflow <=> MAX volume
@@ -61,22 +56,46 @@ def find_neighbors(graph, to_search, sd):
                                 # if a quantity hits a max or min value,
                                 # the corresponding derivative should level off
                                 # e.g., ZERO inflow => ZERO change in inflow
-                                if ((params[IQ] != POS) or (iq_val != ZERO)):
+                                if ((params[IQ] == POS) and (iq_val == ZERO)):
                                     id_val = ZERO
-                                if ((params[VQ] != POS) or (vq_val != ZERO)):
+                                if ((params[VQ] == POS) and (vq_val == ZERO)):
                                     vd_val = ZERO
-                                if ((params[VQ] != POS) or (vq_val != MAX)):
+                                if ((params[VQ] == POS) and (vq_val == MAX)):
                                     vd_val = ZERO
-                                if ((params[OQ] != POS) or (oq_val != ZERO)):
+                                if ((params[OQ] == POS) and (oq_val == ZERO)):
                                     od_val = ZERO
-                                if ((params[OQ] != POS) or (oq_val != MAX)):
+                                if ((params[OQ] == POS) and (oq_val == MAX)):
                                     od_val = ZERO
+
+                                # If a quantity stays at a max (or min) value,
+                                # the corresponding derivative cannot start
+                                # increasing (or decreasing) again
+                                if ((params[IQ] == ZERO) and (iq_val == ZERO)):
+                                    if id_val == NEG:
+                                        continue
+                                if ((params[VQ] == ZERO) and (vq_val == ZERO)):
+                                    if vd_val == NEG:
+                                        continue
+                                if ((params[VQ] == MAX) and (vq_val == MAX)):
+                                    if vd_val == POS:
+                                        continue
+                                if ((params[OQ] == ZERO) and (oq_val == ZERO)):
+                                    if od_val == NEG:
+                                        continue
+                                if ((params[OQ] == MAX) and (oq_val == MAX)):
+                                    if od_val == POS:
+                                        continue
+
+                                neighbor = State_Description([iq_val, id_val,
+                                                              vq_val, vd_val,
+                                                              oq_val, od_val])
 
                                 if neighbor == sd:
                                     continue
                                 else:
-                                    graph[sd] += [neighbor]
-                                    to_search.append(neighbor)
+                                    if neighbor not in graph[sd]:
+                                        graph[sd] += [neighbor]
+                                        to_search.append(neighbor)
 
 
 def enforce_continuity(sd, spaces):
@@ -178,15 +197,14 @@ def enforce_derivatives(sd, spaces):
 def main():
 
     # state transition graph
-    graph = defaultdict(list)
-
+    graph = {}
     # describe an empty tub with no inflow
     empty = State_Description()
     # describe an empty tub in the instant the tap is opened
     tap_on = State_Description([ZERO, POS, ZERO, ZERO, ZERO, ZERO])
 
     # add an edge from empty to tap_on
-    graph[empty] += [tap_on]
+    graph[empty] = [tap_on]
 
     # stack of nodes to search depth-first
     to_search = [tap_on]
@@ -201,11 +219,13 @@ def main():
 
     print(len(graph.keys()))
 
+
     sd = State_Description([POS, POS, MAX, ZERO, MAX, ZERO])
 
     print(len(graph[sd]))
     for n in graph[sd]:
         print(n)
+
 
 
 if __name__ == '__main__':
