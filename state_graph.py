@@ -242,7 +242,7 @@ def enforce_derivatives(sd, spaces):
         if params[IQ] == POS:
             spaces[IQ] = set([POS])
 
-    for i in [VD, OD]:
+    for i in [VD, OD, HD, PD]:
         if params[i] == ZERO:
             # if derivative is ZERO, quantity can't change
             spaces[i - 1] = set([params[i - 1]])
