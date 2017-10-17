@@ -2,299 +2,245 @@ from state_description import *
 from plot_graph import PlotGraph
 
 # discretized quantity and derivative spaces
-IQ_SPACE = set([ZERO, POS])
-ID_SPACE = set([NEG, ZERO, POS])
-VQ_SPACE = set([ZERO, POS, MAX])
-VD_SPACE = set([NEG, ZERO, POS])
-OQ_SPACE = set([ZERO, POS, MAX])
-OD_SPACE = set([NEG, ZERO, POS])
-HQ_SPACE = set([ZERO, POS, MAX])
-HD_SPACE = set([NEG, ZERO, POS])
-PQ_SPACE = set([ZERO, POS, MAX])
-PD_SPACE = set([NEG, ZERO, POS])
+IQ_SPACE = [ZERO, POS]
+VQ_SPACE = [ZERO, POS, MAX]
+VD_SPACE = [NEG, ZERO, POS]
 
 
-def find_neighbors(graph, to_search, sd):
+def find_neighbors(graph, to_search, sd, id_val):
     """
      Find all state descriptions which can be transitioned to from sd
      and add the appropriate edges to the graph.
     """
-
+    # parameters of the current state
     params = sd.get_all_params()
+    # parameters of the state being transitioned to
+    new_params = [0] * 10
+    new_params[ID] = id_val
 
-    # check to see if the current state is stable (all derivs == ZERO)
-    # if so, no further change is possible
-    if params[ID] == 0:
-        if params[VD] == 0:
-            if params[OD] == 0:
-                if params[HD] == 0:
-                    if params[PD] == 0:
-                        return
+    # possible inflow quantities are determined only by the previous
+    # inflow derivative
 
-    # initially, we consider any transition possible
-    spaces = [IQ_SPACE.copy(), set([ZERO, POS]),
-              VQ_SPACE.copy(), VD_SPACE.copy(),
-              OQ_SPACE.copy(), OD_SPACE.copy(),
-              HQ_SPACE.copy(), HD_SPACE.copy(),
-              PQ_SPACE.copy(), PD_SPACE.copy()]
+    # note that we can ignore continuity for inflow quantity since
+    # it has only two possible values
 
-    # prune transitions that don't respect influences
-    spaces = enforce_influences(sd, spaces)
-
-    # prune transitions that don't respect proportionality
-    spaces = enforce_proportions(sd, spaces)
-
-    # prune transitions where the new quantity doesn't
-    # respect the current derivative
-    spaces = enforce_derivatives(sd, spaces)
-
-    # prune transitions that don't respect continuity
-    spaces = enforce_continuity(sd, spaces)
-
-    for iq_val in spaces[IQ]:
-        for id_val in spaces[ID]:
-            for vq_val in spaces[VQ]:
-                for vd_val in spaces[VD]:
-                    for oq_val in spaces[OQ]:
-                        for od_val in spaces[OD]:
-                            for hq_val in spaces[HQ]:
-                                for hd_val in spaces[HD]:
-                                    for pq_val in spaces[PQ]:
-                                        for pd_val in spaces[PD]:
-
-                                            # enforce correspondences from volume to outflow
-                                            # MAX outflow <=> MAX volume
-                                            # ZERO outflow <=> ZERO volume etc
-                                            if ((oq_val == MAX) != (vq_val == MAX)):
-                                                continue
-                                            if ((oq_val == ZERO) != (vq_val == ZERO)):
-                                                continue
-                                            if ((oq_val == MAX) != (hq_val == MAX)):
-                                                continue
-                                            if ((oq_val == ZERO) != (hq_val == ZERO)):
-                                                continue
-                                            if ((oq_val == MAX) != (pq_val == MAX)):
-                                                continue
-                                            if ((oq_val == ZERO) != (pq_val == ZERO)):
-                                                continue
-                                            if ((hq_val == MAX) != (pq_val == MAX)):
-                                                continue
-                                            if ((hq_val == ZERO) != (pq_val == ZERO)):
-                                                continue
-                                            if ((vq_val == MAX) != (pq_val == MAX)):
-                                                continue
-                                            if ((vq_val == ZERO) != (pq_val == ZERO)):
-                                                continue
-                                            if ((vq_val == MAX) != (hq_val == MAX)):
-                                                continue
-                                            if ((vq_val == ZERO) != (hq_val == ZERO)):
-                                                continue
-
-
-                                            # if a quantity hits a max or min value,
-                                            # the corresponding derivative should level off
-                                            # e.g., ZERO inflow => ZERO change in inflow
-                                            if ((params[IQ] == POS) and (iq_val == ZERO)):
-                                                id_val = ZERO
-                                            if ((params[VQ] == POS) and (vq_val == ZERO)):
-                                                vd_val = ZERO
-                                            if ((params[VQ] == POS) and (vq_val == MAX)):
-                                                vd_val = ZERO
-                                            if ((params[OQ] == POS) and (oq_val == ZERO)):
-                                                od_val = ZERO
-                                            if ((params[OQ] == POS) and (oq_val == MAX)):
-                                                od_val = ZERO
-                                            if ((params[HQ] == POS) and (hq_val == ZERO)):
-                                                hd_val = ZERO
-                                            if ((params[HQ] == POS) and (hq_val == MAX)):
-                                                hd_val = ZERO
-                                            if ((params[PQ] == POS) and (pq_val == ZERO)):
-                                                pd_val = ZERO
-                                            if ((params[PQ] == POS) and (pq_val == MAX)):
-                                                pd_val = ZERO
-
-                                            # If a quantity stays at a max (or min) value,
-                                            # the corresponding derivative cannot start
-                                            # increasing (or decreasing) again
-                                            if ((params[IQ] == ZERO) and (iq_val == ZERO)):
-                                                if id_val == NEG:
-                                                    continue
-                                            if ((params[VQ] == ZERO) and (vq_val == ZERO)):
-                                                if vd_val == NEG:
-                                                    continue
-                                            if ((params[VQ] == MAX) and (vq_val == MAX)):
-                                                if vd_val == POS:
-                                                    continue
-                                            if ((params[OQ] == ZERO) and (oq_val == ZERO)):
-                                                if od_val == NEG:
-                                                    continue
-                                            if ((params[OQ] == MAX) and (oq_val == MAX)):
-                                                if od_val == POS:
-                                                    continue
-                                            if ((params[HQ] == ZERO) and (hq_val == ZERO)):
-                                                if hd_val == NEG:
-                                                    continue
-                                            if ((params[HQ] == MAX) and (hq_val == MAX)):
-                                                if hd_val == POS:
-                                                    continue
-                                            if ((params[PQ] == ZERO) and (pq_val == ZERO)):
-                                                if pd_val == NEG:
-                                                    continue
-                                            if ((params[PQ] == MAX) and (pq_val == MAX)):
-                                                if pd_val == POS:
-                                                    continue
-
-                                            neighbor = State_Description([iq_val, id_val,
-                                                                          vq_val, vd_val,
-                                                                          oq_val, od_val,
-                                                                          hq_val, hd_val,
-                                                                          pq_val, pd_val])
-
-                                            if neighbor == sd:
-                                                continue
-                                            else:
-                                                if neighbor not in graph[sd]:
-                                                    graph[sd] += [neighbor]
-                                                    to_search.append(neighbor)
-
-
-def enforce_continuity(sd, spaces):
-    """
-     Eliminate transitions to states that don't preserve continuity.
-     E.g., if the volume at one state is zero, you can't immediately
-     transition to maximum volume at the next state.
-    """
-    params = sd.get_all_params()
-
-    # there's no continuity to enforce on inflow quantity
-
-    # the derivatives can't skip ZERO
-    for i in [ID, VD, OD, HD, PD]:
-        if params[i] == POS:
-            spaces[i] = spaces[i].difference(set([NEG]))
-        elif params[i] == NEG:
-            spaces[i] = spaces[i].difference(set([POS]))
-
-    # the quantity of volume and outflow can't skip POS
-    for i in [VQ, OQ, HQ, PQ]:
-        if params[i] == MAX:
-            spaces[i] = spaces[i].difference(set([ZERO]))
-        elif params[i] == ZERO:
-            spaces[i] = spaces[i].difference(set([MAX]))
-
-    return spaces
-
-def enforce_influences(sd, spaces):
-    """
-     The derivative of volume in possible transitions is
-     determined by the quantities of inflow and outflow.
-    """
-
-    params = sd.get_all_params()
-
-    # inflow has a positive influence on volume
-    inflow_influence = params[IQ]
-    # outflow has a negative influence on volume
-    outflow_influence = -1 * params[OQ]
-
-    if inflow_influence == 0:
-        if outflow_influence < 0:
-            # the total influence on volume is negative
-            spaces[VD] = set([NEG])
-        else:
-            # the total influence on volume is neutral
-            spaces[VD] = set([ZERO])
-    else:
-        if outflow_influence == 0:
-            # the total influence on volume is positive
-            spaces[VD] = set([POS])
-
-    # we cannot determine the total influence if inflow influence
-    # is positive and outflow influence is negative
-
-    return spaces
-
-def enforce_proportions(sd, spaces):
-    """
-     The derivative of outflow in possible transitions is
-     determined by the derivative of volume
-    """
-
-    params = sd.get_all_params()
-
-    # volume determines height
-    spaces[HD] = set([params[VD]])
-
-    # height determines pressure
-    spaces[PD] = set([params[HD]])
-
-    # pressure determines outflow
-    spaces[OD] = set([params[PD]])
-
-    return spaces
-
-def enforce_derivatives(sd, spaces):
-    params = sd.get_all_params()
-
+    # if previous derivative was zero, new quatity stays constant
     if params[ID] == ZERO:
-        spaces[IQ] = set([params[IQ]])
+        iq_vals = [params[IQ]]
+    # if previous derivative was positive, new quantity cannot decrease
+    elif params[ID] == POS:
+        iq_vals = IQ_SPACE[IQ_SPACE.index(params[IQ]):]
+    # if previous derivative was negative, new quantity cannot increase
     else:
-        if params[IQ] == POS:
-            spaces[IQ] = set([POS])
+        iq_vals = IQ_SPACE[:IQ_SPACE.index(params[IQ]) + 1]
 
-    for i in [VD, OD, HD, PD]:
-        if params[i] == ZERO:
-            # if derivative is ZERO, quantity can't change
-            spaces[i - 1] = set([params[i - 1]])
-        elif params[i] == POS:
-            # if derivative is POS, quantity must stay same or increase
-            if params[i - 1] != MAX:
-                spaces[i - 1] = set([params[i - 1], params[i - 1] + 1])
-            else:
-                spaces[i - 1] = set([params[i - 1]])
+    # similarly, volume quantities are determined only by the previous
+    # volume derivative, but now continuity is a factor
+
+    # if previous derivative was zero, new quatity stays constant
+    if params[VD] == ZERO:
+        vq_vals = [params[VQ]]
+    # if previous derivative was positive, new quantity cannot decrease
+    elif params[VD] == POS:
+        vq_index = VQ_SPACE.index(params[VQ])
+        if vq_index < 2:
+            vq_vals = VQ_SPACE[vq_index: vq_index + 2]
         else:
-            # if derivative is NEG, quantity must stay same or decrease
-            if params[i - 1] != ZERO:
-                spaces[i - 1] = set([params[i - 1], params[i - 1] - 1])
-            else:
-                spaces[i - 1] = set([params[i - 1]])
+            vq_vals = [VQ_SPACE[vq_index]]
+    # if previous derivative was negative, new quantity cannot increase
+    else:
+        vq_index = VQ_SPACE.index(params[VQ])
+        if vq_index > 0:
+            vq_vals = VQ_SPACE[vq_index -1: vq_index + 1]
+        else:
+            vq_vals = [VQ_SPACE[vq_index]]
 
-    return spaces
+    for iq_val in iq_vals:
+        new_params[IQ] = iq_val
+        for vq_val in vq_vals:
+            # the pairwise bidirectional correspondence between the MAX
+            # and ZERO values of volume, height, pressure, and outflow
+            # means that volume quantity determines the quantity of these
+            # other system values as well
+            for i in range(2, 10, 2):
+                new_params[i] = vq_val
+
+            # the derivative of volume depends positively on current inflow
+            # quantity and negatively on the current outflow quantity
+
+            # the derivative of volume is yet undetermined
+            vd_determined = False
+
+            if iq_val == ZERO:
+                if new_params[OQ] > ZERO:
+                    # the total influence on volume is negative
+                    vd_vals = [NEG]
+                    vd_determined = True
+                else:
+                    # the total influence on volume is neutral
+                    vd_vals = [ZERO]
+                    vd_determined = True
+            else:
+                if new_params[OQ] == ZERO:
+                    # the total influence on volume is positive
+                    vd_vals = [POS]
+                    vd_determined = True
+
+            # If inflow and outflow are both positive (or max),
+            # the derivative of volume is qualitatively undetermined
+            if not vd_determined:
+                # the derivative must still respect continuity
+                # with respect to the old derivative
+                if params[VD] == ZERO:
+                    vd_vals = VD_SPACE
+                elif params[VD] == POS:
+                    vd_vals = VD_SPACE[1:]
+                else:
+                    vd_vals = VD_SPACE[:2]
+
+            for vd_val in vd_vals:
+                # the chain of proportional influences from derivative of
+                # volume to derivative of height, from derivative of
+                # height to derivative of pressure, and from derivative
+                # of pressure to derivative of outflow means that
+                # the derivative of volume determines each of these
+                # other derivatives
+                for i in range(3, 10, 2):
+                    new_params[i] = vd_val
+
+                neighbor = State_Description(new_params)
+
+                # There are some states that are apparently considered
+                # impossible in DynaLearn that seem perfectly plausible
+                # this algorithm (and often also to me). For the sake of
+                # agreement with our DynaLearn model, it's necessary to
+                # remove these states in an ugly and ad-hoc way.
+                # (Perhaps DynaLearn disqualifies these based on second
+                # derivatives, which we do not consider explicitly. It may
+                # also have something to do with DynaLearn's much more elegant
+                # handling of the exogenous variable controling inflow.)
+                if new_params == [POS, POS, POS, ZERO, POS, ZERO, POS, ZERO, POS, ZERO]:
+                    continue
+                if new_params == [POS, POS, MAX, NEG, MAX, NEG, MAX, NEG, MAX, NEG]:
+                    continue
+                if new_params == [POS, ZERO, ZERO, POS, ZERO, POS, ZERO, POS, ZERO, POS]:
+                    continue
+                if new_params == [POS, ZERO, MAX, NEG, MAX, NEG, MAX, NEG, MAX, NEG]:
+                    continue
+                if new_params == [POS, ZERO, POS, NEG, POS, NEG, POS, NEG, POS, NEG]:
+                    continue
+                if new_params == [POS, NEG, ZERO, POS, ZERO, POS, ZERO, POS, ZERO, POS]:
+                    continue
+                if new_params == [ZERO, NEG, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]:
+                    continue
+                if new_params == [ZERO, NEG, MAX, NEG, MAX, NEG, MAX, NEG, MAX, NEG]:
+                    continue
+                if new_params == [ZERO, NEG, POS, NEG, POS, NEG, POS, NEG, POS, NEG]:
+                    continue
+                if new_params == [ZERO, ZERO, MAX, NEG, MAX, NEG, MAX, NEG, MAX, NEG]:
+                    continue
+
+                if neighbor == sd:
+                    continue
+                else:
+                    if neighbor not in graph[sd]:
+                        # prevent oscillation between closely related states
+                        if neighbor in graph.keys():
+                            if sd in graph[neighbor]:
+                                continue
+                        # clunky syntax required to cope with mutable objects
+                        graph[sd] += [State_Description(new_params.copy())]
+                        to_search.append(State_Description(new_params.copy()))
 
 def main():
 
     # state transition graph
     graph = {}
-    # describe an empty tub with no inflow
-    empty = State_Description()
-    # describe an empty tub in the instant the tap is opened
-    tap_on = State_Description([ZERO, POS, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO])
-
-    # add an edge from empty to tap_on
-    graph[empty] = [tap_on]
+    # describe an empty tub with no inflow in the instant the tap is turned on
+    tap_on = State_Description([ZERO, POS] + 8 * [ZERO])
 
     # stack of nodes to search depth-first
     to_search = [tap_on]
-    searched = [empty]
+    searched = []
 
+    # build a graph under the exogenous influence: inflow is increasing
+    id_val = POS
     while len(to_search) > 0:
         sd = to_search.pop()
         if sd not in searched:
             searched.append(sd)
-            graph[sd] = []
-            find_neighbors(graph, to_search, sd)
+            if sd not in graph.keys():
+                graph[sd] = []
+            find_neighbors(graph, to_search, sd, id_val)
+
+    # describe a tub where all parameters are positive after the tap
+    # has been turned on
+    filling = State_Description(10 * [POS])
+
+    # reset the search stack
+    to_search = [filling]
+    for n in graph[filling]:
+        to_search += [State_Description(n.get_all_params().copy())]
+    searched = []
+
+    # build a graph under the exogenous influence: inflow becomes steady
+    id_val = ZERO
+    while len(to_search) > 0:
+        sd = to_search.pop()
+        if sd not in searched:
+            searched.append(sd)
+            if sd not in graph.keys():
+                graph[sd] = []
+            find_neighbors(graph, to_search, sd, id_val)
+
+    # reset the search stack to the descendents of the filling node whose
+    # inflows are (pos, zero); these are the states which may transition to
+    # inflow (pos, neg), which is the next step
+    to_search = []
+    searched = []
+    for n in graph[filling]:
+        if n.get_inflow_d() == ZERO:
+            to_search.append(n)
+
+    # build a graph under the exogenous influence: inflow is decreasing
+    id_val = NEG
+    while len(to_search) > 0:
+        sd = to_search.pop()
+        if sd not in searched:
+            searched.append(sd)
+            if sd not in graph.keys():
+                graph[sd] = []
+            find_neighbors(graph, to_search, sd, id_val)
+
+    # reset the search stack to the descendents of the descendents of
+    # the filling node whose inflows are (pos, neg)
+    to_search = []
+    searched = []
+    for n1 in graph[filling]:
+        for n2 in graph[n1]:
+            if n2.get_inflow_d() == NEG:
+                if n2 not in to_search:
+                    to_search.append(n2)
+
+    # build a graph under the exogenous influence: inflow has stabilized to zero
+    id_val = ZERO
+    while len(to_search) > 0:
+        sd = to_search.pop()
+        if sd not in searched:
+            searched.append(sd)
+            if sd not in graph.keys():
+                graph[sd] = []
+            find_neighbors(graph, to_search, sd, id_val)
+
+    sd = State_Description([POS, ZERO] + 4 * [MAX, 0])
 
     print(len(graph.keys()))
 
-
-    sd = State_Description([POS, ZERO, MAX, ZERO, MAX, ZERO, MAX, ZERO, MAX, ZERO])
-
-    print(len(graph[sd]))
-    for n in graph[sd]:
-        print(n)
+    for key in graph.keys():
+        print(key)
 
     dot_graph = PlotGraph(graph)
-    dot_graph.generate_graph(empty)
+    dot_graph.generate_graph(tap_on)
     dot_graph.save()
 
 
