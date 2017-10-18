@@ -88,15 +88,66 @@ def find_neighbors(graph, to_search, sd, id_val):
 
             # If inflow and outflow are both positive (or max),
             # the derivative of volume is qualitatively undetermined
+            # by their influence
+
             if not vd_determined:
-                # the derivative must still respect continuity
-                # with respect to the old derivative
-                if params[VD] == ZERO:
-                    vd_vals = VD_SPACE
-                elif params[VD] == POS:
-                    vd_vals = VD_SPACE[1:]
+                # check that the second-derivative effects of inflow
+                # and outflow influence on volume are consistent
+                if params[ID] == ZERO:
+                    if params[OD] == POS:
+                        # the second derivative is negative,
+                        # so the derivative must not increase
+                        vd_index = VD_SPACE.index(params[VD])
+                        if vd_index > 0:
+                            vd_vals = VD_SPACE[vd_index -1: vd_index + 1]
+                        else:
+                            vd_vals = [VD_SPACE[vd_index]]
+                    elif params[OD] == ZERO:
+                        # the second derivative is neutral,
+                        # so the derivative must not change
+                        vd_vals = [params[VD]]
+                    else:
+                        # the second derivative is positive,
+                        # so the derivative must not decrease
+                        vd_index = VD_SPACE.index(params[VD])
+                        if vd_index < 2:
+                            vd_vals = VD_SPACE[vd_index: vd_index + 2]
+                        else:
+                            vd_vals = [VD_SPACE[vd_index]]
+                elif params[ID] == POS:
+                    if params[OD] != POS:
+                        # the total influence on the derivative is positive
+                        vd_index = VD_SPACE.index(params[VD])
+                        if vd_index < 2:
+                            vd_vals = VD_SPACE[vd_index: vd_index + 2]
+                        else:
+                            vd_vals = [VD_SPACE[vd_index]]
+                    else:
+                        # second derivative cannot be determined, so
+                        # rely on continuity
+                        if params[VD] == ZERO:
+                            vd_vals = VD_SPACE
+                        elif params[VD] == POS:
+                            vd_vals = VD_SPACE[1:]
+                        else:
+                            vd_vals = VD_SPACE[:2]
                 else:
-                    vd_vals = VD_SPACE[:2]
+                    if params[OD] != NEG:
+                        # the total influence on the derivative is negative
+                        vd_index = VD_SPACE.index(params[VD])
+                        if vd_index > 0:
+                            vd_vals = VD_SPACE[vd_index -1: vd_index + 1]
+                        else:
+                            vd_vals = [VD_SPACE[vd_index]]
+                    else:
+                        # second derivative cannot be determined, so
+                        # rely on continuity
+                        if params[VD] == ZERO:
+                            vd_vals = VD_SPACE
+                        elif params[VD] == POS:
+                            vd_vals = VD_SPACE[1:]
+                        else:
+                            vd_vals = VD_SPACE[:2]
 
             for vd_val in vd_vals:
                 # the chain of proportional influences from derivative of
@@ -115,14 +166,10 @@ def find_neighbors(graph, to_search, sd, id_val):
                 # this algorithm (and often also to me). For the sake of
                 # agreement with our DynaLearn model, it's necessary to
                 # remove these states in an ugly and ad-hoc way.
-                # (Perhaps DynaLearn disqualifies these based on second
-                # derivatives, which we do not consider explicitly. It may
-                # also have something to do with DynaLearn's much more elegant
-                # handling of the exogenous variable controling inflow.)
                 if new_params == [POS, POS, POS, ZERO, POS, ZERO, POS, ZERO, POS, ZERO]:
                     continue
-                if new_params == [POS, POS, MAX, NEG, MAX, NEG, MAX, NEG, MAX, NEG]:
-                    continue
+                # if new_params == [POS, POS, MAX, NEG, MAX, NEG, MAX, NEG, MAX, NEG]:
+                #     continue
                 if new_params == [POS, ZERO, ZERO, POS, ZERO, POS, ZERO, POS, ZERO, POS]:
                     continue
                 if new_params == [POS, ZERO, MAX, NEG, MAX, NEG, MAX, NEG, MAX, NEG]:
@@ -236,8 +283,8 @@ def main():
 
     print(len(graph.keys()))
 
-    for key in graph.keys():
-        print(key)
+    # for key in graph.keys():
+    #     print(key)
 
     dot_graph = PlotGraph(graph)
     dot_graph.generate_graph(tap_on)
