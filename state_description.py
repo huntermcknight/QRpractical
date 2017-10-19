@@ -112,24 +112,18 @@ class State_Description:
 
 
     def __str__(self):
-        string = 'INFLOW\n'
-        string += 'Q: ' + State_Description.str_trans[self.params[IQ]] + '\n'
-        string += 'd: ' + State_Description.str_trans[self.params[ID]] + '\n'
+        string = 'INFLOW\t\tVOLUME\tOUTFLOW\tHEIGHT\t\tPRESSURE\n'
 
-        string += 'VOLUME\n'
-        string += 'Q: ' + State_Description.str_trans[self.params[VQ]] + '\n'
-        string += 'd: ' + State_Description.str_trans[self.params[VD]] + '\n'
-
-        string += 'OUTFLOW\n'
-        string += 'Q: ' + State_Description.str_trans[self.params[OQ]] + '\n'
-        string += 'd: ' + State_Description.str_trans[self.params[OD]] + '\n'
-
-        string += 'Height\n'
-        string += 'Q: ' + State_Description.str_trans[self.params[HQ]] + '\n'
-        string += 'd: ' + State_Description.str_trans[self.params[HD]] + '\n'
-
-        string += 'Pressure\n'
+        string += 'Q: ' + State_Description.str_trans[self.params[IQ]] + '\t\t\t'
+        string += 'Q: ' + State_Description.str_trans[self.params[VQ]] + '\t\t\t'
+        string += 'Q: ' + State_Description.str_trans[self.params[OQ]] + '\t\t\t'
+        string += 'Q: ' + State_Description.str_trans[self.params[HQ]] + '\t\t\t'
         string += 'Q: ' + State_Description.str_trans[self.params[PQ]] + '\n'
+
+        string += 'd: ' + State_Description.str_trans[self.params[ID]] + '\t\t\t'
+        string += 'd: ' + State_Description.str_trans[self.params[VD]] + '\t\t\t'
+        string += 'd: ' + State_Description.str_trans[self.params[OD]] + '\t\t\t'
+        string += 'd: ' + State_Description.str_trans[self.params[HD]] + '\t\t\t'
         string += 'd: ' + State_Description.str_trans[self.params[PD]] + '\n'
 
         return string
