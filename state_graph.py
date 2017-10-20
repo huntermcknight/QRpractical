@@ -229,18 +229,26 @@ def check_plausibility(new_params):
     """
     plausible = True
 
+    # during the phase where inflow is increasing, volume shouldn't stabilize
+    # in an interval
     if new_params == [POS, POS, POS, ZERO, POS, ZERO, POS, ZERO, POS, ZERO]:
         plausible = False
+    # at the momemnt that inflow 'tops out', volume shouldn't already be
+    # draining
     if new_params == [POS, ZERO, MAX, NEG, MAX, NEG, MAX, NEG, MAX, NEG]:
         plausible = False
+    # at the moment that inflow 'tops out', volume shouldn't start draining
+    # from an interval
     if new_params == [POS, ZERO, POS, NEG, POS, NEG, POS, NEG, POS, NEG]:
         plausible = False
+    # should never reach a state where inflow is (ZERO, NEG)
     if new_params == [ZERO, NEG, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO, ZERO]:
         plausible = False
     if new_params == [ZERO, NEG, MAX, NEG, MAX, NEG, MAX, NEG, MAX, NEG]:
         plausible = False
     if new_params == [ZERO, NEG, POS, NEG, POS, NEG, POS, NEG, POS, NEG]:
         plausible = False
+    # inflow shouldn't be completely stopped before the tub starts draining
     if new_params == [ZERO, ZERO, MAX, NEG, MAX, NEG, MAX, NEG, MAX, NEG]:
         plausible = False
 
