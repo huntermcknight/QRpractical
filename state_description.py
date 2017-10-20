@@ -112,19 +112,36 @@ class State_Description:
 
 
     def __str__(self):
-        string = 'INFLOW\t\tVOLUME\tOUTFLOW\tHEIGHT\t\tPRESSURE\n'
+        # This pretty-print looks the nicest in stdout, but it doesn't align right
+        # at all in graphviz prints. The commented-out string format looks okay in
+        # graphviz, but it's still crooked for some nodes in the graph.
 
-        string += 'Q: ' + State_Description.str_trans[self.params[IQ]] + '\t\t\t'
-        string += 'Q: ' + State_Description.str_trans[self.params[VQ]] + '\t\t\t'
-        string += 'Q: ' + State_Description.str_trans[self.params[OQ]] + '\t\t\t'
-        string += 'Q: ' + State_Description.str_trans[self.params[HQ]] + '\t\t\t'
-        string += 'Q: ' + State_Description.str_trans[self.params[PQ]] + '\n'
+        header = '{: >2}{: ^8}{: ^8}{: ^9}{: ^8}{: ^10}'.format(' ', 'INFLOW', 'VOLUME', 'OUTFLOW', 'HEIGHT', 'PRESSURE')
+        # string = 'INFLOW\t\tVOLUME\tOUTFLOW\tHEIGHT\t\tPRESSURE\n'
 
-        string += 'd: ' + State_Description.str_trans[self.params[ID]] + '\t\t\t'
-        string += 'd: ' + State_Description.str_trans[self.params[VD]] + '\t\t\t'
-        string += 'd: ' + State_Description.str_trans[self.params[OD]] + '\t\t\t'
-        string += 'd: ' + State_Description.str_trans[self.params[HD]] + '\t\t\t'
-        string += 'd: ' + State_Description.str_trans[self.params[PD]] + '\n'
+        quant_string = '{: >2}{: ^8}{: ^8}{: ^9}{: ^8}{: ^10}'.format('Q:', State_Description.str_trans[self.params[IQ]],
+                                                                      State_Description.str_trans[self.params[VQ]],
+                                                                      State_Description.str_trans[self.params[OQ]],
+                                                                      State_Description.str_trans[self.params[HQ]],
+                                                                      State_Description.str_trans[self.params[PQ]])
+        # string += 'Q: ' + State_Description.str_trans[self.params[IQ]] + '\t\t\t'
+        # string += 'Q: ' + State_Description.str_trans[self.params[VQ]] + '\t\t\t'
+        # string += 'Q: ' + State_Description.str_trans[self.params[OQ]] + '\t\t\t'
+        # string += 'Q: ' + State_Description.str_trans[self.params[HQ]] + '\t\t\t'
+        # string += 'Q: ' + State_Description.str_trans[self.params[PQ]] + '\n'
+
+        deriv_string = '{: >2}{: ^8}{: ^8}{: ^9}{: ^8}{: ^10}'.format('d:', State_Description.str_trans[self.params[ID]],
+                                                                      State_Description.str_trans[self.params[VD]],
+                                                                      State_Description.str_trans[self.params[OD]],
+                                                                      State_Description.str_trans[self.params[HD]],
+                                                                      State_Description.str_trans[self.params[PD]])
+        # string += 'd: ' + State_Description.str_trans[self.params[ID]] + '\t\t\t'
+        # string += 'd: ' + State_Description.str_trans[self.params[VD]] + '\t\t\t'
+        # string += 'd: ' + State_Description.str_trans[self.params[OD]] + '\t\t\t'
+        # string += 'd: ' + State_Description.str_trans[self.params[HD]] + '\t\t\t'
+        # string += 'd: ' + State_Description.str_trans[self.params[PD]] + '\n'
+
+        string = header + '\n' + quant_string + '\n' + deriv_string
 
         return string
 
