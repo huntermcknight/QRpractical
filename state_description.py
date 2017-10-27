@@ -1,3 +1,5 @@
+# from tabulate import tabulate
+
 # global constants for qualitative state descriptions
 ZERO = 0
 POS = 1
@@ -30,15 +32,22 @@ class State_Description:
     """
 
     # mapping of integer values of global constants to strings for printing
-    str_trans = {0 : '0', 1 : '+', -1 : '-', 2 : 'MAX'}
+    str_trans = {0 : '0\t', 1 : '+\t', -1 : '-\t', 2 : 'MAX'}
 
     def __init__(self, values = 10 * [ZERO]):
+        self.name = "UNSET"
         # sanitize input
         if len(values) != 10:
             values = 10 * [ZERO]
             print('Invalid state description: should be ten ints')
 
         self.params = values
+
+    def get_name(self):
+        return self.name
+
+    def set_name(self, name):
+        self.name = name
 
     def get_inflow_q(self):
         return self.params[IQ]
@@ -50,22 +59,22 @@ class State_Description:
         return self.params[VQ]
 
     def get_volume_d(self):
-        return self.self.params[VD]
+        return self.params[VD]
 
     def get_outflow_q(self):
-        return self.self.params[OQ]
+        return self.params[OQ]
 
     def get_outflow_d(self):
         return self.params[OD]
 
     def get_height_q(self):
-        return self.self.params[HQ]
+        return self.params[HQ]
 
     def get_height_d(self):
         return self.params[HD]
 
     def get_pressure_q(self):
-        return self.self.params[PQ]
+        return self.params[PQ]
 
     def get_pressure_d(self):
         return self.params[PD]
@@ -110,20 +119,19 @@ class State_Description:
         else:
             self.params = values
 
-
     def __str__(self):
-        string = 'INFLOW\t\tVOLUME\tOUTFLOW\tHEIGHT\t\tPRESSURE\n'
+        string = 'Inflow\tVolume\tOutflow\tHeigth\tPressure\n'
 
-        string += 'Q: ' + State_Description.str_trans[self.params[IQ]] + '\t\t\t'
-        string += 'Q: ' + State_Description.str_trans[self.params[VQ]] + '\t\t\t'
-        string += 'Q: ' + State_Description.str_trans[self.params[OQ]] + '\t\t\t'
-        string += 'Q: ' + State_Description.str_trans[self.params[HQ]] + '\t\t\t'
+        string += 'Q: ' + State_Description.str_trans[self.params[IQ]] + '\t'
+        string += 'Q: ' + State_Description.str_trans[self.params[VQ]] + '\t'
+        string += 'Q: ' + State_Description.str_trans[self.params[OQ]] + '\t'
+        string += 'Q: ' + State_Description.str_trans[self.params[HQ]] + '\t'
         string += 'Q: ' + State_Description.str_trans[self.params[PQ]] + '\n'
 
-        string += 'd: ' + State_Description.str_trans[self.params[ID]] + '\t\t\t'
-        string += 'd: ' + State_Description.str_trans[self.params[VD]] + '\t\t\t'
-        string += 'd: ' + State_Description.str_trans[self.params[OD]] + '\t\t\t'
-        string += 'd: ' + State_Description.str_trans[self.params[HD]] + '\t\t\t'
+        string += 'd: ' + State_Description.str_trans[self.params[ID]] + '\t'
+        string += 'd: ' + State_Description.str_trans[self.params[VD]] + '\t'
+        string += 'd: ' + State_Description.str_trans[self.params[OD]] + '\t'
+        string += 'd: ' + State_Description.str_trans[self.params[HD]] + '\t'
         string += 'd: ' + State_Description.str_trans[self.params[PD]] + '\n'
 
         return string

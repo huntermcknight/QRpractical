@@ -1,5 +1,6 @@
 from state_description import *
 from plot_graph import PlotGraph
+from GUI import StateVisualisation
 
 # discretized quantity and derivative spaces
 IQ_SPACE = [ZERO, POS]
@@ -346,7 +347,6 @@ def main():
             if sd not in graph.keys():
                 graph[sd] = []
             find_neighbors(graph, to_search, blacklist, sd, id_val)
-
     # describe a tub where all parameters are positive after the tap
     # has been turned on
     filling = State_Description(10 * [POS])
@@ -420,9 +420,15 @@ def main():
 
     print(len(graph.keys()))
 
-    dot_graph = PlotGraph(graph)
+    dot_graph = StateVisualisation(graph)
+    dot_graph.set_name(tap_on)
     dot_graph.generate_graph(tap_on)
-    dot_graph.save()
+    dot_graph.show_graph()
+
+    # Uncomment to save complete state graph to a file
+    # dot_graph = PlotGraph(graph)
+    # dot_graph.generate_graph(tap_on)
+    # dot_graph.save()
 
 
 if __name__ == '__main__':
